@@ -31,5 +31,12 @@ jobs:
           do
             npm install --save-dev $rule
           done
+      - name: Create textlint config file
+        run: |
+          rules_json=${{ toJson(github.event.inputs.rules) || '["textlint-rule-no-todo", "textlint-rule-alex"]' }}
+          echo "{ \"rules\": {" > .textlintrc
+          rules_array=$(echo $rules_json | jq -r '.[]' | sed -e 's/^/\"/' -e 's/$/\": true,/' )
+          echo $rules_array | sed 's/,$//' >> .textlintrc
+          echo "} }" >> .textlintrc
       - name: Run textlint
         run: npx textlint "**/*.md"
