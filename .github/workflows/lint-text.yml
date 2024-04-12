@@ -1,36 +1,35 @@
 name: Run TextLint Rules
-
-on:
+'on':
   workflow_call:
     inputs:
       rules:
         type: string
-        description: 'JSON array of textlint rule packages'
+        description: JSON array of textlint rule packages
         required: true
         default: '["textlint-rule-no-todo", "textlint-rule-alex"]'
-
 jobs:
   textLint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20.x'
-
+          node-version: 20.x
       - name: Install textlint
         run: npm install --save-dev textlint jq
-
       - name: Install textlint rules
-        run: |
-          rules_array=$(echo '${{ inputs.rules }}' | jq -r '.[]')
+        run: >
+          rules_json=${{ toJson(github.event.inputs.rules) ||
+          '["textlint-rule-no-todo", "textlint-rule-alex"]' }}
+
+          rules_array=$(echo $rules_json | jq -r '.[]')
+
           for rule in $rules_array
+
           do
             npm install --save-dev $rule
           done
-
       - name: Run textlint
         run: npx textlint "**/*.md"
