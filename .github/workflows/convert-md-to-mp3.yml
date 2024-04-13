@@ -1,0 +1,46 @@
+name: "Convert Markdown to MP3"
+
+on:
+  workflow_call:
+    inputs:
+      apiKey:
+        description: 'ElevenLabs API Key'
+        required: true
+        type: secret
+      voice:
+        description: 'Voice for TTS conversion'
+        required: false
+        default: 'en-US-Wavenet-F'
+        type: string
+      filePath:
+        description: 'Path to the Markdown file'
+        required: true
+        type: string
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install node-fetch
+
+      - name: Convert Markdown to MP3
+        run: node convertToMP3.js ${{ github.workspace }}/${{ inputs.filePath }} ${{ inputs.apiKey }} ${{ inputs.voice }}
+        env:
+          NODE_OPTIONS: '--experimental-modules --experimental-json-modules'
+
+      - name: Commit MP3 files
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add ${{ github.workspace }}/${{ inputs.filePath }}.mp3
+          git commit -m "Add generated MP3 file"
+          git push
