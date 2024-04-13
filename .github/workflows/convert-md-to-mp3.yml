@@ -33,7 +33,7 @@ jobs:
         run: npm install node-fetch
 
       - name: Convert Markdown to MP3
-        run: node convertToMP3.js ${{ github.workspace }}/${{ inputs.filePath }} ${{ inputs.apiKey }} ${{ inputs.voice }}
+        run: node tts/convertToMP3.js ${{ github.workspace }}/${{ inputs.filePath }} ${{ inputs.apiKey }} ${{ inputs.voice }}
         env:
           NODE_OPTIONS: '--experimental-modules --experimental-json-modules'
 
